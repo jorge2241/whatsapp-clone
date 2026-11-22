@@ -4,7 +4,16 @@ import { appReducer } from "./AppReducer";
 export const AppContext = createContext();
 
 const initialState = {
-  user: null,
+  user: {
+  user:{
+    uid:"",
+    name:"",
+    email:"",
+    photo:""
+  },
+  chats:[],
+  selectedChat:null
+},
   chats: [],
   selectedChat: null
 };
@@ -14,6 +23,8 @@ export const AppProvider = ({ children }) => {
     appReducer,
     initialState
   );
+
+ 
 
   return (
     <AppContext.Provider
