@@ -7,6 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../servicios/firebase";
+
 
 
 function Login() {
@@ -20,20 +23,30 @@ function Login() {
 
     const provider = new GoogleAuthProvider();
 
-    const result =
-      await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(auth, provider);
 
-    dispatch({
-      type: "LOGIN",
-      payload: {
-        uid: result.user.uid,
-        name: result.user.displayName,
-        email: result.user.email,
-        photo: result.user.photoURL
-      }
-    });
+await setDoc(
+  doc(db, "users", result.user.uid),
+  {
+    uid: result.user.uid,
+    name: result.user.displayName,
+    email: result.user.email,
+    photo: result.user.photoURL,
+    createdAt: new Date()
+  }
+);
 
-    navigate("/chat");
+dispatch({
+  type: "LOGIN",
+  payload: {
+    uid: result.user.uid,
+    name: result.user.displayName,
+    email: result.user.email,
+    photo: result.user.photoURL
+  }
+});
+
+navigate("/chat");
 
   } catch (error) {
     console.log(error);
