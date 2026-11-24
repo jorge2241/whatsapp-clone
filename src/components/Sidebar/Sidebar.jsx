@@ -8,14 +8,21 @@ function Sidebar() {
   return (
     <div>
 
-      {state.chats.map(usuario => (
+      {state.chats?.map(usuario => (
 
         <div
           key={usuario.uid}
+          onClick={() =>
+            dispatch({
+              type: "SELECT_CHAT",
+              payload: usuario
+            })
+          }
           style={{
             display: "flex",
             gap: "10px",
-            marginBottom: "10px"
+            marginBottom: "10px",
+            cursor: "pointer"
           }}
         >
           <img
@@ -24,9 +31,11 @@ function Sidebar() {
             width="40"
           />
 
-          <span>
-            {usuario.name}
-          </span>
+          <div>
+            <span>{usuario.name}</span>
+
+            <p>{usuario.email}</p>
+          </div>
 
         </div>
 
@@ -37,38 +46,3 @@ function Sidebar() {
 }
 
 export default Sidebar;
-
-/*
-
-  import { useContext } from "react";
-import { AppContext } from "../../context/AppContext";
-
-function Sidebar() {
-
-  const { state, dispatch } =
-    useContext(AppContext);
-
-  return (
-    <div className="sidebar">
-
-      {state.chats.map(chat => (
-        <div
-          key={chat.id}
-          onClick={() =>
-            dispatch({
-              type: "SELECT_CHAT",
-              payload: chat
-            })
-          }
-        >
-          {chat.name}
-        </div>
-      ))}
-
-    </div>
-  );
-}
-
-export default Sidebar;
-
-*/

@@ -15,6 +15,9 @@ function Home() {
 
   const { state, dispatch } = useContext(AppContext);
 
+  console.log(state.user);
+  console.log(state.user?.photo);
+
   const navigate = useNavigate();
 
   const obtenerUsuarios = async () => {

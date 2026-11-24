@@ -5,26 +5,21 @@ export const AppContext = createContext();
 
 const initialState = {
   user: {
-  user:{
-    uid:"",
-    name:"",
-    email:"",
-    photo:""
+    uid: "",
+    name: "",
+    email: "",
+    photo: ""
   },
-  chats:[],
-  selectedChat:null
-},
   chats: [],
   selectedChat: null
 };
 
 export const AppProvider = ({ children }) => {
+
   const [state, dispatch] = useReducer(
     appReducer,
     initialState
   );
-
- 
 
   return (
     <AppContext.Provider

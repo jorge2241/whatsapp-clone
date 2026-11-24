@@ -5,6 +5,9 @@ function Chat() {
   const { state } =
     useContext(AppContext);
 
+    console.log("selectedChat", 
+      state.selectedChat);
+
   return (
     <div className="chat">
 
