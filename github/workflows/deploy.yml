@@ -40,6 +40,13 @@ jobs:
         with:
           path: dist
 
+      - name: Verify generated HTML
+        run: |
+          echo "Contenido del index.html generado:"
+          cat dist/index.html
+          echo "Archivos generados:"
+          find dist -maxdepth 2 -type f
+
   deploy:
     environment:
       name: github-pages
