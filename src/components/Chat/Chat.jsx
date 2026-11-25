@@ -165,6 +165,8 @@ function Chat() {
         };
       }
 
+  
+
       const ultimoMensaje = imagen
         ? texto
           ?  '📷 ${texto}' 
@@ -173,15 +175,15 @@ function Chat() {
 
       // Actualizar información de la conversación
       await setDoc(
-        chatRef,
-        {
-          participants: [usuario.uid, otroUsuarioId],
-          lastMessage: ultimoMensaje,
-          lastMessageSender: usuario.uid,
-          lastMessageAt: serverTimestamp(),
-        },
-        { merge: true }
-      );
+  chatRef,
+  {
+    participants: [usuario.uid, otroUsuarioId].sort(),
+    lastMessage: ultimoMensaje,
+    lastMessageSender: usuario.uid,
+    lastMessageAt: serverTimestamp(),
+  },
+  { merge: true }
+);
 
       // Guardar mensaje en Firestore
       await addDoc(mensajesRef, nuevoMensaje);
