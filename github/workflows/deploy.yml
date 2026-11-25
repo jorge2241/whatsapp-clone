@@ -35,11 +35,6 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
       - name: Verify generated HTML
         run: |
           echo "Contenido del index.html generado:"
@@ -47,6 +42,13 @@ jobs:
           echo "Archivos generados:"
           find dist -maxdepth 2 -type f
 
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+     
   deploy:
     environment:
       name: github-pages
