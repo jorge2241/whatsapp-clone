@@ -117,9 +117,9 @@ function Chat() {
 
     if (!chatId || !usuario?.uid || enviando) return;
 
-    const textos = mensaje.trim(); /* texto -> textos */
+    const texto = mensaje.trim(); /* */
 
-    if (!textos && !imagen) return;  /* texto -> textos */
+    if (!texto && !imagen) return;  /*  */
 
     setEnviando(true);
 
