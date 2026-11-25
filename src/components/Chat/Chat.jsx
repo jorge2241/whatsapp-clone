@@ -12,33 +12,49 @@ import {
   setDoc,
 } from "firebase/firestore";
 
-import { db } from "../../servicios/firebase";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+
+import { db, storage } from "../../servicios/firebase";
 
 function Chat() {
-
   const { state } = useContext(AppContext);
 
   const [mensaje, setMensaje] = useState("");
   const [mensajes, setMensajes] = useState([]);
   const [enviando, setEnviando] = useState(false);
+  const [imagen, setImagen] = useState(null);
+  const [vistaPrevia, setVistaPrevia] = useState("");
 
   const usuario = state.user;
   const chatSeleccionado = state.selectedChat;
 
-  // ID único de conversación
+  const otroUsuarioId =
+    chatSeleccionado?.uid || chatSeleccionado?.id;
 
-const otroUsuarioId = chatSeleccionado?.uid || chatSeleccionado?.id;
+  const chatId =
+    usuario?.uid && otroUsuarioId
+      ? [usuario.uid, otroUsuarioId].sort().join("_")
+      : null;
 
-const chatId =
-  usuario?.uid && otroUsuarioId
-    ? [usuario.uid, otroUsuarioId].sort().join("_")
-    : null;
-
-
-
-  // Escuchar mensajes
+  // Crear vista previa de la imagen
   useEffect(() => {
+    if (!imagen) {
+      setVistaPrevia("");
+      return;
+    }
 
+    const url = URL.createObjectURL(imagen);
+    setVistaPrevia(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [imagen]);
+
+  // Escuchar mensajes en tiempo real
+  useEffect(() => {
     if (!chatId) {
       setMensajes([]);
       return;
@@ -59,14 +75,12 @@ const chatId =
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-
-        const lista = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
+        const lista = snapshot.docs.map((documento) => ({
+          id: documento.id,
+          ...documento.data(),
         }));
 
         setMensajes(lista);
-
       },
       (error) => {
         console.error("Error al cargar mensajes:", error);
@@ -74,107 +88,141 @@ const chatId =
     );
 
     return () => unsubscribe();
-
   }, [chatId]);
 
-  // Enviar mensaje
-  const enviarMensaje = async (e) => {
+  // Seleccionar fotografía
+  const seleccionarImagen = (e) => {
+    const archivo = e.target.files?.[0];
 
+    if (!archivo) return;
+
+    if (!archivo.type.startsWith("image/")) {
+      alert("Selecciona un archivo de imagen.");
+      e.target.value = "";
+      return;
+    }
+
+    if (archivo.size > 5 * 1024 * 1024) {
+      alert("La imagen no puede superar los 5 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setImagen(archivo);
+  };
+
+  // Enviar mensaje o fotografía
+  const enviarMensaje = async (e) => {
     e.preventDefault();
 
-    if (!mensaje.trim() || !chatId || enviando) return;
+    if (!chatId || !usuario?.uid || enviando) return;
+
+    const textos = mensaje.trim(); /* texto -> textos */
+
+    if (!textos && !imagen) return;  /* texto -> textos */
 
     setEnviando(true);
 
     try {
-        
-         const texto = mensaje.trim();
+      const chatRef = doc(db, "chats", chatId);
 
-          const chatRef = doc(db, "chats", chatId);
-
-         const mensajesRef = collection(
-          chatRef,
-          "messages"
-          );
-
-             const nuevoMensaje = {
-             senderId: usuario.uid,
-             senderName: usuario.name,
-            text: texto,
-            createdAt: serverTimestamp()
-             };
-
-// Crear o actualizar información de la conversación
-              await setDoc(chatRef, {
-               participants: [usuario.uid, otroUsuarioId],
-               lastMessage: texto,
-               lastMessageSender: usuario.uid,
-               lastMessageAt: serverTimestamp()
-               }, { merge: true });
-
-// Guardar el mensaje
-              await addDoc(mensajesRef, nuevoMensaje);
-
-              setMensaje("");
-
-    /*  const mensajesRef = collection(
-        db,
-        "chats",
-        chatId,
+      const mensajesRef = collection(
+        chatRef,
         "messages"
       );
 
-      await addDoc(mensajesRef, {
+      let nuevoMensaje;
 
-        senderId: usuario.uid,
+      if (imagen) {
+        // Subir imagen a Firebase Storage
+      
+      const nombreArchivo = '${Date.now()}_${imagen.name.replace(/[^a-zA-Z0-9._-]/g, "_")};'  /* puse comillas invertidas */
 
-        senderName: usuario.name,
+        const rutaImagen = ' chats/${chatId}/${nombreArchivo};'  /* puse comillas invertidas */
 
-        text: mensaje.trim(),
+        const imagenRef = ref(storage, rutaImagen);
 
-        createdAt: serverTimestamp()
+        await uploadBytes(imagenRef, imagen);
 
-      });
+        const imageUrl = await getDownloadURL(imagenRef);
 
+        nuevoMensaje = {
+          senderId: usuario.uid,
+          senderName: usuario.name || usuario.displayName || "Usuario",
+          type: "image",
+          imageUrl,
+          fileName: imagen.name,
+          text: texto,
+          createdAt: serverTimestamp(),
+        };
+      } else {
+        nuevoMensaje = {
+          senderId: usuario.uid,
+          senderName: usuario.name || usuario.displayName || "Usuario",
+          type: "text",
+          text: texto,
+          createdAt: serverTimestamp(),
+        };
+      }
 
+      const ultimoMensaje = imagen
+        ? texto
+          ?  '📷 ${texto}' 
+          : "📷 Imagen"
+        : texto;
 
+      // Actualizar información de la conversación
+      await setDoc(
+        chatRef,
+        {
+          participants: [usuario.uid, otroUsuarioId],
+          lastMessage: ultimoMensaje,
+          lastMessageSender: usuario.uid,
+          lastMessageAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      // Guardar mensaje en Firestore
+      await addDoc(mensajesRef, nuevoMensaje);
 
       setMensaje("");
+      setImagen(null);
 
-     */ 
+      const inputImagen = document.getElementById(
+        "chat-image-input"
+      );
+
+      if (inputImagen) {
+        inputImagen.value = "";
+      }
 
     } catch (error) {
-
       console.error("Error al enviar:", error);
 
-      alert("No se pudo enviar el mensaje");
-
+      alert(
+        "No se pudo enviar el mensaje. Comprueba Firebase Storage y sus permisos."
+      );
     } finally {
-
       setEnviando(false);
-
     }
-
   };
 
   return (
-
     <div
       className="chat"
       style={{
         flex: 1,
-        padding: "20px"
+        padding: "20px",
       }}
     >
-
       {chatSeleccionado ? (
-
         <>
-
           <h2>
             Chat con {chatSeleccionado.name}
           </h2>
 
+          {/* Lista de mensajes */}
           <div
             style={{
               minHeight: "350px",
@@ -183,44 +231,128 @@ const chatId =
               border: "1px solid #ccc",
               padding: "10px",
               marginBottom: "10px",
-              borderRadius: "8px"
+              borderRadius: "8px",
             }}
           >
-
             {mensajes.length === 0 ? (
-
               <p>No hay mensajes todavía</p>
-
             ) : (
-
               mensajes.map((msg) => (
-
                 <div
                   key={msg.id}
                   style={{
-                    marginBottom: "10px",
+                    marginBottom: "15px",
                     textAlign:
                       msg.senderId === usuario.uid
                         ? "right"
-                        : "left"
+                        : "left",
                   }}
                 >
-
                   <strong>
                     {msg.senderName}
                   </strong>
 
-                  <p>{msg.text}</p>
+                  {/* Mostrar fotografía */}
+                  {msg.type === "image" && msg.imageUrl && (
+                    <div>
+                      <a
+                        href={msg.imageUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={msg.imageUrl}
+                          alt="Imagen enviada"
+                          loading="lazy"
+                          style={{
+                            display: "block",
+                            maxWidth: "220px",
+                            maxHeight: "250px",
+                            objectFit: "contain",
+                            borderRadius: "10px",
+                            marginTop: "5px",
+                            marginLeft:
+                              msg.senderId === usuario.uid
+                                ? "auto"
+                                : "0",
+                          }}
+                        />
+                      </a>
+                    </div>
+                  )}
 
+                  {/* Mostrar texto */}
+                  {msg.text && (
+                    <p>{msg.text}</p>
+                  )}
                 </div>
-
               ))
-
             )}
-
           </div>
 
-          <form onSubmit={enviarMensaje}>
+          {/* Vista previa */}
+          {vistaPrevia && (
+            <div
+              style={{
+                marginBottom: "10px",
+                padding: "10px",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                display: "inline-block",
+              }}
+            >
+              <img
+                src={vistaPrevia}
+                alt="Vista previa"
+                style={{
+                  maxWidth: "150px",
+                  maxHeight: "150px",
+                  objectFit: "contain",
+                  display: "block",
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setImagen(null)}
+                style={{ marginTop: "8px" }}
+              >
+                Quitar imagen
+              </button>
+            </div>
+          )}
+
+          {/* Formulario */}
+          <form
+            onSubmit={enviarMensaje}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+          >
+            {/* Botón para seleccionar imagen */}
+            <label
+              htmlFor="chat-image-input"
+              style={{
+                cursor: "pointer",
+                fontSize: "24px",
+                padding: "5px",
+              }}
+              title="Adjuntar imagen"
+            >
+              📎
+            </label>
+
+            <input
+              id="chat-image-input"
+              type="file"
+              accept="image/*"
+              onChange={seleccionarImagen}
+              disabled={enviando}
+              style={{ display: "none" }}
+            />
 
             <input
               type="text"
@@ -230,35 +362,27 @@ const chatId =
               }
               placeholder="Escribe un mensaje..."
               style={{
-                width: "70%",
-                padding: "10px"
+                flex: 1,
+                minWidth: "120px",
+                padding: "10px",
               }}
             />
 
             <button
               type="submit"
-              disabled={!mensaje.trim() || enviando}
-              style={{
-                marginLeft: "10px"
-              }}
+              disabled={
+                (!mensaje.trim() && !imagen) || enviando
+              }
             >
               {enviando ? "Enviando..." : "Enviar"}
             </button>
-
           </form>
-
         </>
-
       ) : (
-
         <h2>Selecciona un chat</h2>
-
       )}
-
     </div>
-
   );
-
 }
 
 export default Chat;
