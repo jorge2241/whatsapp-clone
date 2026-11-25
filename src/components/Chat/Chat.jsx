@@ -1,5 +1,5 @@
 import { AppContext } from "../../context/AppContext";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 
 import {
   collection,
@@ -29,6 +29,8 @@ function Chat() {
   const [imagen, setImagen] = useState(null);
   const [vistaPrevia, setVistaPrevia] = useState("");
 
+  const mensajesFinalRef = useRef(null);
+
   const usuario = state.user;
   const chatSeleccionado = state.selectedChat;
 
@@ -40,7 +42,12 @@ function Chat() {
       ? [usuario.uid, otroUsuarioId].sort().join("_")
       : null;
 
-  // Crear vista previa de la imagen
+  const nombreContacto =
+    chatSeleccionado?.name || "Usuario";
+
+  const inicial = nombreContacto.charAt(0).toUpperCase();
+
+  // Vista previa de imagen
   useEffect(() => {
     if (!imagen) {
       setVistaPrevia("");
@@ -90,6 +97,13 @@ function Chat() {
     return () => unsubscribe();
   }, [chatId]);
 
+  // Bajar automáticamente al último mensaje
+  useEffect(() => {
+    mensajesFinalRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [mensajes]);
+
   // Seleccionar fotografía
   const seleccionarImagen = (e) => {
     const archivo = e.target.files?.[0];
@@ -111,15 +125,31 @@ function Chat() {
     setImagen(archivo);
   };
 
-  // Enviar mensaje o fotografía
+  // Formato de hora
+  const obtenerHora = (fecha) => {
+    if (!fecha) return "";
+
+    const date = fecha.toDate
+      ? fecha.toDate()
+      : new Date(fecha);
+
+    if (isNaN(date.getTime())) return "";
+
+    return date.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Enviar mensaje
   const enviarMensaje = async (e) => {
     e.preventDefault();
 
     if (!chatId || !usuario?.uid || enviando) return;
 
-    const texto = mensaje.trim(); /* */
+    const texto = mensaje.trim();
 
-    if (!texto && !imagen) return;  /*  */
+    if (!texto && !imagen) return;
 
     setEnviando(true);
 
@@ -134,11 +164,11 @@ function Chat() {
       let nuevoMensaje;
 
       if (imagen) {
-        // Subir imagen a Firebase Storage
-      
-      const nombreArchivo = '${Date.now()}_${imagen.name.replace(/[^a-zA-Z0-9._-]/g, "_")};'  /* puse comillas invertidas */
+        const nombreArchivo =
+          '${Date.now()}_${imagen.name.replace(/[^a-zA-Z0-9._-]/g, "_")}';
 
-        const rutaImagen = ' chats/${chatId}/${nombreArchivo};'  /* puse comillas invertidas */
+        const rutaImagen =
+          chats/'${chatId}/${nombreArchivo}';
 
         const imagenRef = ref(storage, rutaImagen);
 
@@ -148,7 +178,8 @@ function Chat() {
 
         nuevoMensaje = {
           senderId: usuario.uid,
-          senderName: usuario.name || usuario.displayName || "Usuario",
+          senderName:
+            usuario.name || usuario.displayName || "Usuario",
           type: "image",
           imageUrl,
           fileName: imagen.name,
@@ -158,34 +189,31 @@ function Chat() {
       } else {
         nuevoMensaje = {
           senderId: usuario.uid,
-          senderName: usuario.name || usuario.displayName || "Usuario",
+          senderName:
+            usuario.name || usuario.displayName || "Usuario",
           type: "text",
           text: texto,
           createdAt: serverTimestamp(),
         };
       }
 
-  
-
       const ultimoMensaje = imagen
         ? texto
-          ?  '📷 ${texto}' 
+          ? '📷 ${texto}'
           : "📷 Imagen"
         : texto;
 
-      // Actualizar información de la conversación
       await setDoc(
-  chatRef,
-  {
-    participants: [usuario.uid, otroUsuarioId].sort(),
-    lastMessage: ultimoMensaje,
-    lastMessageSender: usuario.uid,
-    lastMessageAt: serverTimestamp(),
-  },
-  { merge: true }
-);
+        chatRef,
+        {
+          participants: [usuario.uid, otroUsuarioId].sort(),
+          lastMessage: ultimoMensaje,
+          lastMessageSender: usuario.uid,
+          lastMessageAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
 
-      // Guardar mensaje en Firestore
       await addDoc(mensajesRef, nuevoMensaje);
 
       setMensaje("");
@@ -200,63 +228,175 @@ function Chat() {
       }
 
     } catch (error) {
-      console.error("Error al enviar:", error);
+      console.error("Error real al enviar:", error);
 
       alert(
-        "No se pudo enviar el mensaje. Comprueba Firebase Storage y sus permisos."
+        "No se pudo enviar el mensaje. Revisa la consola para conocer el error."
       );
     } finally {
       setEnviando(false);
     }
   };
 
+  const estilos = {
+    contenedor: {
+      display: "flex",
+      flexDirection: "column",
+      height: "calc(100vh - 40px)",
+      minHeight: "450px",
+      background: "#efeae2",
+      borderRadius: "12px",
+      overflow: "hidden",
+      boxShadow: "0 3px 15px rgba(0,0,0,0.12)",
+    },
+
+    cabecera: {
+      background: "#075e54",
+      color: "white",
+      padding: "14px 20px",
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+    },
+
+    avatar: {
+      width: "44px",
+      height: "44px",
+      borderRadius: "50%",
+      background: "#d9fdd3",
+      color: "#075e54",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "20px",
+      fontWeight: "bold",
+    },
+
+    zonaMensajes: {
+      flex: 1,
+      overflowY: "auto",
+      padding: "20px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+      backgroundColor: "#efeae2",
+      backgroundImage:
+        "radial-gradient(rgba(120,100,80,0.08) 1px, transparent 1px)",
+      backgroundSize: "20px 20px",
+    },
+
+    burbujaBase: {
+      maxWidth: "75%",
+      minWidth: "70px",
+      padding: "9px 12px 6px",
+      borderRadius: "10px",
+      boxShadow: "0 1px 2px rgba(0,0,0,0.12)",
+      overflowWrap: "anywhere",
+    },
+
+    formulario: {
+      background: "#f0f2f5",
+      padding: "12px",
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+    },
+
+    entrada: {
+      flex: 1,
+      minWidth: 0,
+      border: "none",
+      outline: "none",
+      borderRadius: "25px",
+      padding: "13px 18px",
+      fontSize: "15px",
+      background: "white",
+    },
+
+    botonEnviar: {
+      border: "none",
+      borderRadius: "50%",
+      width: "45px",
+      height: "45px",
+      background: "#075e54",
+      color: "white",
+      fontSize: "20px",
+      cursor: "pointer",
+    },
+  };
+
   return (
-    <div
-      className="chat"
-      style={{
-        flex: 1,
-        padding: "20px",
-      }}
-    >
+    <div style={estilos.contenedor}>
+
       {chatSeleccionado ? (
         <>
-          <h2>
-            Chat con {chatSeleccionado.name}
-          </h2>
+          {/* CABECERA */}
+          <header style={estilos.cabecera}>
+            <div style={estilos.avatar}>
+              {inicial}
+            </div>
 
-          {/* Lista de mensajes */}
-          <div
-            style={{
-              minHeight: "350px",
-              maxHeight: "450px",
-              overflowY: "auto",
-              border: "1px solid #ccc",
-              padding: "10px",
-              marginBottom: "10px",
-              borderRadius: "8px",
-            }}
-          >
-            {mensajes.length === 0 ? (
-              <p>No hay mensajes todavía</p>
-            ) : (
-              mensajes.map((msg) => (
+            <div>
+              <div style={{ fontWeight: "bold", fontSize: "16px" }}>
+                {nombreContacto}
+              </div>
+
+              <div style={{ fontSize: "12px", opacity: 0.85 }}>
+                Conversación privada
+              </div>
+            </div>
+          </header>
+
+          {/* MENSAJES */}
+          <div style={estilos.zonaMensajes}>
+
+            {mensajes.length === 0 && (
+              <div style={{
+                textAlign: "center",
+                margin: "auto",
+                background: "#fff",
+                padding: "15px 20px",
+                borderRadius: "10px",
+                color: "#667781",
+                fontSize: "14px",
+              }}>
+                ¡Comienza la conversación!
+              </div>
+            )}
+
+            {mensajes.map((msg) => {
+              const esMio = msg.senderId === usuario.uid;
+
+              return (
                 <div
                   key={msg.id}
                   style={{
-                    marginBottom: "15px",
-                    textAlign:
-                      msg.senderId === usuario.uid
-                        ? "right"
-                        : "left",
+                    display: "flex",
+                    justifyContent: esMio
+                      ? "flex-end"
+                      : "flex-start",
                   }}
                 >
-                  <strong>
-                    {msg.senderName}
-                  </strong>
+                  <div
+                    style={{
+                      ...estilos.burbujaBase,
+                      background: esMio ? "#d9fdd3" : "#ffffff",
+                      borderTopRightRadius: esMio ? "3px" : "10px",
+                      borderTopLeftRadius: esMio ? "10px" : "3px",
+                    }}
+                  >
+                    {!esMio && (
+                      <div style={{
+                        fontSize: "12px",
+                        color: "#075e54",
+                        fontWeight: "bold",
+                        marginBottom: "4px",
+                      }}>
+                        {msg.senderName}
+                      </div>
+                    )}
 
-                  {/* Mostrar fotografía */}
-                  {msg.type === "image" && msg.imageUrl && (
-                    <div>
+                    {msg.type === "image" && msg.imageUrl && (
                       <a
                         href={msg.imageUrl}
                         target="_blank"
@@ -268,81 +408,107 @@ function Chat() {
                           loading="lazy"
                           style={{
                             display: "block",
-                            maxWidth: "220px",
-                            maxHeight: "250px",
+                            width: "100%",
+                            maxWidth: "250px",
+                            maxHeight: "280px",
                             objectFit: "contain",
-                            borderRadius: "10px",
-                            marginTop: "5px",
-                            marginLeft:
-                              msg.senderId === usuario.uid
-                                ? "auto"
-                                : "0",
+                            borderRadius: "8px",
+                            marginBottom: "5px",
                           }}
                         />
                       </a>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Mostrar texto */}
-                  {msg.text && (
-                    <p>{msg.text}</p>
-                  )}
+                    {msg.text && (
+                      <div style={{
+                        fontSize: "15px",
+                        color: "#111b21",
+                        lineHeight: "1.45",
+                        whiteSpace: "pre-wrap",
+                      }}>
+                        {msg.text}
+                      </div>
+                    )}
+
+                    <div style={{
+                      fontSize: "10px",
+                      color: "#667781",
+                      textAlign: "right",
+                      marginTop: "4px",
+                    }}>
+                      {obtenerHora(msg.createdAt)}
+                      {esMio && (
+                        <span style={{
+                          color: "#53a7c5",
+                          marginLeft: "5px",
+                          fontSize: "13px",
+                        }}>
+                          ✓✓
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              ))
-            )}
+              );
+            })}
+
+            <div ref={mensajesFinalRef} />
           </div>
 
-          {/* Vista previa */}
+          {/* VISTA PREVIA DE IMAGEN */}
           {vistaPrevia && (
-            <div
-              style={{
-                marginBottom: "10px",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                display: "inline-block",
-              }}
-            >
+            <div style={{
+              background: "#f0f2f5",
+              padding: "10px 15px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+            }}>
               <img
                 src={vistaPrevia}
                 alt="Vista previa"
                 style={{
-                  maxWidth: "150px",
-                  maxHeight: "150px",
-                  objectFit: "contain",
-                  display: "block",
+                  width: "65px",
+                  height: "65px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
                 }}
               />
 
               <button
                 type="button"
-                onClick={() => setImagen(null)}
-                style={{ marginTop: "8px" }}
+                onClick={() => {
+                  setImagen(null);
+                  const input = document.getElementById("chat-image-input");
+                  if (input) input.value = "";
+                }}
+                style={{
+                  border: "none",
+                  background: "#e4e6eb",
+                  borderRadius: "20px",
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                }}
               >
-                Quitar imagen
+                Quitar imagen ✕
               </button>
             </div>
           )}
 
-          {/* Formulario */}
+          {/* FORMULARIO */}
           <form
             onSubmit={enviarMensaje}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              flexWrap: "wrap",
-            }}
+            style={estilos.formulario}
           >
-            {/* Botón para seleccionar imagen */}
             <label
               htmlFor="chat-image-input"
+              title="Adjuntar fotografía"
               style={{
+                fontSize: "25px",
                 cursor: "pointer",
-                fontSize: "24px",
+                color: "#54656f",
                 padding: "5px",
               }}
-              title="Adjuntar imagen"
             >
               📎
             </label>
@@ -359,32 +525,45 @@ function Chat() {
             <input
               type="text"
               value={mensaje}
-              onChange={(e) =>
-                setMensaje(e.target.value)
-              }
+              onChange={(e) => setMensaje(e.target.value)}
               placeholder="Escribe un mensaje..."
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "10px",
-              }}
+              style={estilos.entrada}
+              disabled={enviando}
             />
 
             <button
               type="submit"
-              disabled={
-                (!mensaje.trim() && !imagen) || enviando
-              }
+              disabled={(!mensaje.trim() && !imagen) || enviando}
+              style={{
+                ...estilos.botonEnviar,
+                opacity: (!mensaje.trim() && !imagen) || enviando
+                  ? 0.5
+                  : 1,
+              }}
+              title="Enviar mensaje"
             >
-              {enviando ? "Enviando..." : "Enviar"}
+              ➤
             </button>
           </form>
         </>
       ) : (
-        <h2>Selecciona un chat</h2>
+        <div style={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          color: "#667781",
+          flexDirection: "column",
+          gap: "12px",
+        }}>
+          <div style={{ fontSize: "65px" }}>💬</div>
+          <h2>Selecciona un chat</h2>
+          <p>Elige un contacto para comenzar a conversar.</p>
+        </div>
       )}
     </div>
   );
 }
 
 export default Chat;
+
