@@ -1,0 +1,133 @@
+* {
+  box-sizing: border-box;
+}
+
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #075e54, #128c7e);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  font-family: Arial, sans-serif;
+}
+
+.login-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.login-header h1 {
+  font-size: 30px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.whatsapp-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #25d366;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 30px;
+}
+
+.login-card {
+  background: white;
+  width: 100%;
+  max-width: 420px;
+  padding: 45px 35px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+}
+
+.login-card h2 {
+  color: #075e54;
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.login-description {
+  color: #667781;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 35px;
+}
+
+.google-login {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.google-login img {
+  width: 22px;
+  height: 22px;
+}
+
+.google-login:hover {
+  background: #f5f5f5;
+  border-color: #25d366;
+  transform: translateY(-2px);
+}
+
+.login-footer {
+  border-top: 1px solid #eee;
+  margin-top: 35px;
+  padding-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-footer p {
+  color: #128c7e;
+  font-weight: bold;
+  margin: 0;
+  font-size: 14px;
+}
+
+.login-footer strong {
+  color: #444;
+  font-size: 13px;
+}
+
+.login-footer span {
+  color: #8696a0;
+  font-size: 12px;
+}
+
+.login-copyright {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  margin-top: 25px;
+}
+
+@media (max-width: 480px) {
+  .login-header h1 {
+    font-size: 25px;
+  }
+
+  .login-card {
+    padding: 35px 22px;
+  }
+}
