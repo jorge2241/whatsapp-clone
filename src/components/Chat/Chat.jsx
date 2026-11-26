@@ -166,12 +166,18 @@ function Chat() {
       if (imagen) {
 
         /* hay que poner commillas invertidas        */ 
-        const nombreArchivo =
-          '${Date.now()}_${imagen.name.replace(/[^a-zA-Z0-9._-]/g, "_")}';
+         const nombreArchivo =
+        `${Date.now()}_${imagen.name.replace(/[^a-zA-Z0-9._-]/g, "_")}` ;
+
+      //  const nombreArchivo =
+      //    '${Date.now()}_${imagen.name.replace(/[^a-zA-Z0-9._-]/g, "_")}';
 
         /* hay que poner commillas invertidas        */ 
-        const rutaImagen =
-          chats/'${chatId}/${nombreArchivo}';
+         const rutaImagen =
+         chats/`${chatId}/${nombreArchivo}`;
+
+       // const rutaImagen =
+       //   chats/'${chatId}/${nombreArchivo}';
 
         const imagenRef = ref(storage, rutaImagen);
 
@@ -199,10 +205,10 @@ function Chat() {
           createdAt: serverTimestamp(),
         };
       }
-/* hay que poner commillas invertidas   ''´´     */ 
+/* hay que poner commillas invertidas   ''´´ ``   */ 
       const ultimoMensaje = imagen
         ? texto
-          ? '📷 ${texto}'
+          ? `📷 ${texto}`
           : "📷 Imagen"
         : texto;
 
@@ -245,19 +251,13 @@ function Chat() {
     contenedor: {
       display: "flex",
       flexDirection: "column",
-     // height: "calc(100vh - 40px)",
-     // minHeight: "450px",
-
       height: "100%",
       minHeight: 0,
       width: "100%",
-      borderRadius: 0,
-      boxShadow: "none",
-
       background: "#efeae2",
-      borderRadius: "12px",
+      borderRadius: 0,
       overflow: "hidden",
-      boxShadow: "0 3px 15px rgba(0,0,0,0.12)",
+      boxShadow: "none",
     },
 
     cabecera: {
