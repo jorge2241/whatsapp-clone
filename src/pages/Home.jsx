@@ -1,79 +1,95 @@
 import Sidebar from "../components/Sidebar/Sidebar";
 import Chat from "../components/Chat/Chat";
-import { useContext } from "react";
+
+import { useContext, useEffect } from "react";
 import { AppContext } from "../context/AppContext";
 
-import { useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../servicios/firebase";
+import { db, auth } from "../servicios/firebase";
 
 import { signOut } from "firebase/auth";
-import { auth } from "../servicios/firebase";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
+
+import "./Home.css";
 
 function Home() {
-
   const { state, dispatch } = useContext(AppContext);
-
-  console.log(state.user);
-  console.log(state.user?.photo);
-
   const navigate = useNavigate();
 
   const obtenerUsuarios = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "users"));
 
-    console.log("Consultando usuarios...");
-
-    const snapshot =
-      await getDocs(collection(db, "users"));
-
-    console.log(snapshot);
-
-    const usuarios =
-      snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+      const usuarios = snapshot.docs.map((documento) => ({
+        id: documento.id,
+        ...documento.data(),
       }));
 
-    dispatch({
-      type: "SET_CHATS",
-      payload: usuarios
-    });
+      dispatch({
+        type: "SET_CHATS",
+        payload: usuarios,
+      });
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+    }
   };
 
   const cerrarSesion = async () => {
-
-    await signOut(auth);
-
-    navigate("/");
+    try {
+      await signOut(auth);
+      navigate("/");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
   };
 
   useEffect(() => {
     obtenerUsuarios();
   }, []);
 
-  console.log(state);
-
   return (
-    <div className="app">
+    <div className="home-container">
 
-      <img
-        src={state.user?.photo}
-        alt="Foto perfil"
-        width="60"
-      />
+      {/* PANEL IZQUIERDO */}
+      <aside className={`home-sidebar ${
+        state.selectedChat ? "sidebar-selected" : ""
+      }`}>
 
-      <h2>{state.user?.name}</h2>
+        <div className="home-user">
+          <div className="home-user-info">
+            <img
+              src={state.user?.photo || "/default-avatar.png"}
+              alt="Foto de perfil"
+              className="home-avatar"
+            />
 
-      <p>{state.user?.email}</p>
+            <div className="home-user-details">
+              <strong>{state.user?.name}</strong>
+              <span>{state.user?.email}</span>
+            </div>
+          </div>
 
-      <Sidebar />
+          <button
+            className="logout-button"
+            onClick={cerrarSesion}
+            title="Cerrar sesión"
+          >
+            <span>↪️</span>
+          </button>
+        </div>
 
-      <Chat />
+        <div className="home-sidebar-content">
+          <Sidebar />
+        </div>
 
-      <button onClick={cerrarSesion}>
-        Cerrar sesión
-      </button>
+      </aside>
+
+      {/* PANEL DERECHO */}
+      <main className={`home-chat ${
+        state.selectedChat ? "chat-selected" : ""
+      }`}>
+        <Chat />
+      </main>
 
     </div>
   );
