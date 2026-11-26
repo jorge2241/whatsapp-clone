@@ -21,7 +21,7 @@ import {
 import { db, storage } from "../../servicios/firebase";
 
 function Chat() {
-  const { state } = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
 
   const [mensaje, setMensaje] = useState("");
   const [mensajes, setMensajes] = useState([]);
@@ -46,6 +46,13 @@ function Chat() {
     chatSeleccionado?.name || "Usuario";
 
   const inicial = nombreContacto.charAt(0).toUpperCase();
+
+  const volverAChats = () => {
+  dispatch({
+    type: "SELECT_CHAT",
+    payload: null,
+  });
+};
 
   // Vista previa de imagen
   useEffect(() => {
@@ -341,10 +348,23 @@ function Chat() {
       {chatSeleccionado ? (
         <>
           {/* CABECERA */}
+          {/* reemplace  para poner boton de retorno */}
           <header style={estilos.cabecera}>
-            <div style={estilos.avatar}>
-              {inicial}
+
+          {/* BOTÓN VOLVER: SOLO EN CELULAR */}
+           <button
+            type="button"
+            className="boton-volver-chat"
+            onClick={volverAChats}
+           title="Volver a los chats"
+           >
+              ←
+          </button>
+
+           <div style={estilos.avatar}>
+             {inicial}
             </div>
+         
 
             <div>
               <div style={{ fontWeight: "bold", fontSize: "16px" }}>

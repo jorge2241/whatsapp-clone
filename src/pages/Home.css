@@ -132,3 +132,23 @@
     width: 100%;
   }
 }
+
+/* BOTÓN VOLVER */
+
+.boton-volver-chat {
+  display: none;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+/* SOLO CELULARES */
+
+@media (max-width: 700px) {
+  .boton-volver-chat {
+    display: block;
+  }
+}
