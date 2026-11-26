@@ -67,12 +67,15 @@ function Chat() {
     return () => URL.revokeObjectURL(url);
   }, [imagen]);
 
-  // Escuchar mensajes en tiempo real
-  useEffect(() => {
-    if (!chatId) {
-      setMensajes([]);
-      return;
-    }
+  
+   // Escuchar mensajes en tiempo real
+    useEffect(() => {
+    // Limpiar inmediatamente los mensajes anteriores
+    setMensajes([]);
+
+    if (!chatId) return;
+
+    let activo = true;
 
     const mensajesRef = collection(
       db,
@@ -89,6 +92,8 @@ function Chat() {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
+        if (!activo) return;
+
         const lista = snapshot.docs.map((documento) => ({
           id: documento.id,
           ...documento.data(),
@@ -97,11 +102,17 @@ function Chat() {
         setMensajes(lista);
       },
       (error) => {
-        console.error("Error al cargar mensajes:", error);
+        if (activo) {
+          console.error("Error al cargar mensajes:", error);
+        }
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      activo = false;
+      unsubscribe();
+    };
+
   }, [chatId]);
 
   // Bajar automáticamente al último mensaje

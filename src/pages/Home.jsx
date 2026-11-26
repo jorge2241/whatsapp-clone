@@ -88,7 +88,14 @@ function Home() {
       <main className={`home-chat ${
         state.selectedChat ? "chat-selected" : ""
       }`}>
-        <Chat />
+       
+        <Chat
+            key={
+            state.selectedChat?.uid ||
+             state.selectedChat?.id ||
+            "sin-chat"
+           }
+         />
       </main>
 
     </div>
