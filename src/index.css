@@ -143,3 +143,17 @@ code {
     font-size: 14px;
   }
 }
+
+/* CONTROL DE ALTURA GLOBAL */
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
