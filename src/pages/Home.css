@@ -1,34 +1,42 @@
-* {
-  box-sizing: border-box;
-}
+/* =====================================
+   CONTENEDOR PRINCIPAL
+===================================== */
 
 .home-container {
   display: flex;
   width: 100%;
   height: 100vh;
   height: 100dvh;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
   background: #ffffff;
 }
 
-/* PANEL IZQUIERDO */
+/* =====================================
+   PANEL IZQUIERDO
+===================================== */
 
 .home-sidebar {
-  width: 360px;
-  min-width: 300px;
-  max-width: 420px;
+  flex: 0 0 clamp(260px, 28vw, 360px);
+  min-width: 0;
   height: 100%;
+  min-height: 0;
+
   display: flex;
   flex-direction: column;
+
   background: #ffffff;
   border-right: 1px solid #d9dfe3;
-  flex-shrink: 0;
 }
 
 .home-user {
   min-height: 76px;
+  flex-shrink: 0;
   padding: 12px 15px;
+
   background: #f0f2f5;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,6 +53,7 @@
 .home-avatar {
   width: 45px;
   height: 45px;
+  flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -74,6 +83,7 @@
 }
 
 .logout-button {
+  flex-shrink: 0;
   border: none;
   background: transparent;
   color: #54656f;
@@ -86,34 +96,45 @@
   color: #075e54;
 }
 
+/* CONTENIDO DEL SIDEBAR */
+
 .home-sidebar-content {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* PANEL DERECHO */
+/* =====================================
+   PANEL DERECHO
+===================================== */
 
 .home-chat {
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
+  min-height: 0;
   height: 100%;
   overflow: hidden;
 }
 
-/* TABLETS Y NOTEBOOKS */
+/* =====================================
+   NOTEBOOKS Y TABLETS
+===================================== */
 
 @media (max-width: 900px) and (min-width: 701px) {
   .home-sidebar {
-    width: 290px;
-    min-width: 250px;
+    flex-basis: 290px;
   }
 }
 
-/* CELULARES */
+/* =====================================
+   CELULARES
+===================================== */
 
 @media (max-width: 700px) {
   .home-sidebar {
+    flex: 1 1 100%;
     width: 100%;
     max-width: none;
     min-width: 0;
@@ -121,6 +142,7 @@
 
   .home-chat {
     display: none;
+    width: 100%;
   }
 
   .home-sidebar.sidebar-selected {
@@ -129,11 +151,14 @@
 
   .home-chat.chat-selected {
     display: flex;
+    flex: 1 1 100%;
     width: 100%;
   }
 }
 
-/* BOTÓN VOLVER */
+/* =====================================
+   BOTÓN VOLVER AL CHAT
+===================================== */
 
 .boton-volver-chat {
   display: none;
@@ -144,8 +169,6 @@
   cursor: pointer;
   padding: 0 5px;
 }
-
-/* SOLO CELULARES */
 
 @media (max-width: 700px) {
   .boton-volver-chat {

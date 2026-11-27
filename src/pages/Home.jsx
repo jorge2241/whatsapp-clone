@@ -35,13 +35,18 @@ function Home() {
   };
 
   const cerrarSesion = async () => {
-    try {
-      await signOut(auth);
-      navigate("/");
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-    }
-  };
+  try {
+    await signOut(auth);
+
+    dispatch({
+      type: "LOGOUT"
+    });
+
+    navigate("/");
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+  }
+};
 
   useEffect(() => {
     obtenerUsuarios();

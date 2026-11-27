@@ -4,7 +4,20 @@ export const appReducer = (state, action) => {
     case "LOGIN":
       return {
         ...state,
-        user: action.payload
+        user: action.payload,
+        selectedChat: null
+      };
+
+    case "LOGOUT":
+      return {
+        user: {
+          uid: "",
+          name: "",
+          email: "",
+          photo: ""
+        },
+        chats: [],
+        selectedChat: null
       };
 
     case "SET_CHATS":

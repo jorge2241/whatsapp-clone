@@ -1,8 +1,7 @@
 import { createContext, useReducer } from "react";
 import { appReducer } from "./AppReducer";
 
-export const AppContext = createContext();
-
+// Estado inicial de la aplicación
 const initialState = {
   user: {
     uid: "",
@@ -14,6 +13,10 @@ const initialState = {
   selectedChat: null
 };
 
+// Crear contexto global
+export const AppContext = createContext(null);
+
+// Proveedor del contexto
 export const AppProvider = ({ children }) => {
 
   const [state, dispatch] = useReducer(
@@ -22,9 +25,7 @@ export const AppProvider = ({ children }) => {
   );
 
   return (
-    <AppContext.Provider
-      value={{ state, dispatch }}
-    >
+    <AppContext.Provider value={{ state, dispatch }}>
       {children}
     </AppContext.Provider>
   );
