@@ -1,24 +1,46 @@
+/* CONFIGURACIÓN GENERAL */
+
 * {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* PANTALLA LOGIN */
+
 .login-page {
+  width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   background: linear-gradient(135deg, #075e54, #128c7e);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px 20px;
+  padding: 20px;
   font-family: Arial, sans-serif;
 }
+
+/* ENCABEZADO */
 
 .login-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 30px;
-  color: white;
+  margin-bottom: 24px;
+  color: #ffffff;
 }
 
 .login-header h1 {
@@ -35,15 +57,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #ffffff;
   font-size: 30px;
 }
 
+/* TARJETA PRINCIPAL */
+
 .login-card {
-  background: white;
+  background: #ffffff;
   width: 100%;
   max-width: 420px;
-  padding: 45px 35px;
+  padding: 40px 35px;
   border-radius: 15px;
   text-align: center;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
@@ -52,29 +76,35 @@
 .login-card h2 {
   color: #075e54;
   font-size: 28px;
+  margin-top: 0;
   margin-bottom: 12px;
 }
 
+/* DESCRIPCIÓN */
+
 .login-description {
-  color: #667781;
+  color: #4b5563;
   font-size: 15px;
   line-height: 1.6;
-  margin-bottom: 35px;
+  margin-top: 0;
+  margin-bottom: 30px;
 }
+
+/* BOTÓN GOOGLE */
 
 .google-login {
   width: 100%;
   padding: 14px;
   border: 1px solid #dadce0;
   border-radius: 8px;
-  background: white;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   font-size: 15px;
   font-weight: 600;
-  color: #444;
+  color: #333333;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -90,37 +120,49 @@
   transform: translateY(-2px);
 }
 
+.google-login:focus-visible {
+  outline: 3px solid #25d366;
+  outline-offset: 3px;
+}
+
+/* PIE DE TARJETA */
+
 .login-footer {
-  border-top: 1px solid #eee;
-  margin-top: 35px;
-  padding-top: 22px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 30px;
+  padding-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .login-footer p {
-  color: #128c7e;
+  color: #087f70;
   font-weight: bold;
   margin: 0;
   font-size: 14px;
 }
 
 .login-footer strong {
-  color: #444;
+  color: #333333;
   font-size: 13px;
 }
 
 .login-footer span {
-  color: #8696a0;
+  color: #59636e;
   font-size: 12px;
 }
 
+/* COPYRIGHT */
+
 .login-copyright {
-  color: rgba(255, 255, 255, 0.8);
+  color: #ffffff;
   font-size: 12px;
-  margin-top: 25px;
+  margin-top: 22px;
+  text-align: center;
 }
+
+/* PANTALLAS PEQUEÑAS */
 
 @media (max-width: 480px) {
   .login-header h1 {
@@ -129,5 +171,28 @@
 
   .login-card {
     padding: 35px 22px;
+  }
+}
+
+/* PANTALLAS DE POCA ALTURA */
+
+@media (max-height: 650px) {
+  .login-page {
+    justify-content: flex-start;
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+
+  .login-header {
+    margin-bottom: 15px;
+  }
+
+  .login-card {
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+
+  .login-copyright {
+    margin-top: 12px;
   }
 }
