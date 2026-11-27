@@ -35,6 +35,10 @@ jobs:
       - name: Build project
         run: npm run build
 
+      # NUEVO: Solución para rutas internas de React
+      - name: Configure SPA fallback
+        run: cp dist/index.html dist/404.html
+
       - name: Verify generated HTML
         run: |
           echo "Contenido del index.html generado:"
