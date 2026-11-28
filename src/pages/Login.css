@@ -29,6 +29,7 @@ body {
   justify-content: center;
   padding: 15px 20px;
   overflow-x: hidden;
+  background: #075e54;
 }
 
 /* ENCABEZADO */
@@ -37,8 +38,8 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
-  color: #ffffff;
+  margin-bottom: 24px; 
+  color: #eae0e0;
 }
 
 .login-header h1 {
@@ -113,7 +114,7 @@ body {
 }
 
 .google-login:hover {
-  background: #0a481a;
+  background: #91a496;
   border-color: #25d366;
   transform: translateY(-2px);
 }
