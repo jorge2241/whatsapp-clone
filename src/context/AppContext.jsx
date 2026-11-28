@@ -35,6 +35,13 @@ export const AppProvider = ({ children }) => {
           photo: firebaseUser.photoURL || ""
         };
 
+        // Actualizar inmediatamente el estado del usuario
+        dispatch({
+          type: "LOGIN",
+          payload: usuario
+        });
+
+        // Registrar o actualizar usuario en Firestore
         try {
           await setDoc(
             doc(db, "users", firebaseUser.uid),
@@ -45,11 +52,6 @@ export const AppProvider = ({ children }) => {
           console.error("Error al actualizar usuario:", error);
         }
 
-        dispatch({
-          type: "LOGIN",
-          payload: usuario
-        });
-
       } else {
 
         dispatch({
@@ -59,6 +61,7 @@ export const AppProvider = ({ children }) => {
       }
 
       setLoading(false);
+
     });
 
     return () => unsubscribe();

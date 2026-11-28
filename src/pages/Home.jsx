@@ -48,9 +48,15 @@ function Home() {
   }
 };
 
-  useEffect(() => {
-    obtenerUsuarios();
-  }, []);
+// se mejora car de usuarios
+
+ useEffect(() => {
+  if (!state.user?.uid) return;
+
+  obtenerUsuarios();
+
+}, [state.user?.uid]);
+
 
   return (
     <div className="home-container">
